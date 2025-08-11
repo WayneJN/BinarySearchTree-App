@@ -3,7 +3,9 @@ package com.wayne.bstapp.service;
 
 import com.wayne.bstapp.model.TreeNode;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class BinarySearchTree {
     private TreeNode root;
@@ -44,5 +46,110 @@ public class BinarySearchTree {
             inOrderHelper(node.getRight(), result);
         }
     }
+
+    // DELETE
+    public void delete(int value) {
+        root = deleteRecursive(root, value);
+    }
+
+    private TreeNode deleteRecursive(TreeNode node, int value) {
+        if (node == null) return null;
+
+        if (value < node.getValue()) {
+            node.setLeft(deleteRecursive(node.getLeft(), value));
+        } else if (value > node.getValue()) {
+            node.setRight(deleteRecursive(node.getRight(), value));
+        } else {
+            // Node with one child or no child
+            if (node.getLeft() == null) return node.getRight();
+            if (node.getRight() == null) return node.getLeft();
+
+            // Node with two children: get inorder successor
+            TreeNode successor = findMin(node.getRight());
+            node = new TreeNode(successor.getValue());
+            node.setRight(deleteRecursive(node.getRight(), successor.getValue()));
+            node.setLeft(deleteRecursive(node.getLeft(), successor.getValue())); // optional: preserve left subtree
+        }
+        return node;
+    }
+
+    private TreeNode findMin(TreeNode node) {
+        while (node.getLeft() != null) node = node.getLeft();
+        return node;
+    }
+
+    // PRE-ORDER
+    public List<Integer> preOrderTraversal() {
+        List<Integer> result = new ArrayList<>();
+        preOrderHelper(root, result);
+        return result;
+    }
+
+    private void preOrderHelper(TreeNode node, List<Integer> result) {
+        if (node != null) {
+            result.add(node.getValue());
+            preOrderHelper(node.getLeft(), result);
+            preOrderHelper(node.getRight(), result);
+        }
+    }
+
+    // POST-ORDER
+    public List<Integer> postOrderTraversal() {
+        List<Integer> result = new ArrayList<>();
+        postOrderHelper(root, result);
+        return result;
+    }
+
+    private void postOrderHelper(TreeNode node, List<Integer> result) {
+        if (node != null) {
+            postOrderHelper(node.getLeft(), result);
+            postOrderHelper(node.getRight(), result);
+            result.add(node.getValue());
+        }
+    }
+
+    // LEVEL-ORDER
+    public List<Integer> levelOrderTraversal() {
+        List<Integer> result = new ArrayList<>();
+        if (root == null) return result;
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            TreeNode current = queue.poll();
+            result.add(current.getValue());
+            if (current.getLeft() != null) queue.add(current.getLeft());
+            if (current.getRight() != null) queue.add(current.getRight());
+        }
+
+        return result;
+    }
+
+    // HEIGHT
+    public int getHeight() {
+        return heightHelper(root);
+    }
+
+    private int heightHelper(TreeNode node) {
+        if (node == null) return -1;
+        return 1 + Math.max(heightHelper(node.getLeft()), heightHelper(node.getRight()));
+    }
+
+    // BALANCE CHECK
+    public boolean isBalanced() {
+        return isBalancedHelper(root) != -1;
+    }
+
+    private int isBalancedHelper(TreeNode node) {
+        if (node == null) return 0;
+
+        int left = isBalancedHelper(node.getLeft());
+        int right = isBalancedHelper(node.getRight());
+
+        if (left == -1 || right == -1 || Math.abs(left - right) > 1) return -1;
+        return 1 + Math.max(left, right);
+    }
+
 }
 
